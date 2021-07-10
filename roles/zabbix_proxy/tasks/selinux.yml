@@ -38,12 +38,21 @@
   tags:
     - zabbix-proxy
 
-- name: "SELinux | RedHat | Add SEmodule to fix SELinux issue: zabbix_proxy_alerter.sock"
+- name: "SELinux | RedHat | Collect SEmodule list"
+  command: 'semodule -l'
+  register: semodule_list
+  become: yes
+  check_mode: no
+  when:
+    - ansible_os_family == "RedHat"
+  tags:
+    - zabbix-proxy
+
+- name: "SELinux | RedHat | Add SEmodule to fix SELinux issue: zabbix_server_alerter.sock"
   script:
     cmd: files/install_semodule.bsx
-  args:
-    creates: /etc/selinux/targeted/active/modules/400/zabbix_proxy_add/cil
   become: yes
+  when: "'zabbix_server_add' not in semodule_list.stdout_lines"
   when:
     - ansible_os_family == "RedHat"
   tags:

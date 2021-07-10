@@ -116,9 +116,14 @@
   tags:
     - zabbix-server
 
+- name: "SELinux | RedHat | Collect SEmodule list"
+  command: 'semodule -l'
+  register: semodule_list
+  become: yes
+  check_mode: no
+
 - name: "SELinux | RedHat | Add SEmodule to fix SELinux issue: zabbix_server_alerter.sock"
   script:
     cmd: files/install_semodule.bsx
-  args:
-    creates: /etc/selinux/targeted/active/modules/400/zabbix_server_add/cil
-    become: yes
+  become: yes
+  when: "'zabbix_server_add' not in semodule_list.stdout_lines"
